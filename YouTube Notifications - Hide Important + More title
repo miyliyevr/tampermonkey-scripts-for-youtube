@@ -1,0 +1,41 @@
+// ==UserScript==
+// @name         YouTube Notifications - Hide Important + More title
+// @namespace    youtube-notifications-clean
+// @version      1.1
+// @match        https://www.youtube.com/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    function cleanSections() {
+        const sections = document.querySelectorAll(
+            'ytd-multi-page-menu-renderer yt-multi-page-menu-section-renderer'
+        );
+
+        sections.forEach(section => {
+            const title = section.querySelector('#section-title');
+            if (!title) return;
+
+            const text = title.textContent.trim().toLowerCase();
+
+            if (text === 'important') {
+                section.style.display = 'none';
+            }
+
+            if (text === 'more notifications') {
+                title.style.display = 'none';
+            }
+        });
+    }
+
+    const observer = new MutationObserver(cleanSections);
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    cleanSections();
+})();
