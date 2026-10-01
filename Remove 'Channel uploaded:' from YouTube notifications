@@ -1,0 +1,38 @@
+// ==UserScript==
+// @name         YouTube Notifications - Remove "Channel uploaded:"
+// @namespace    youtube-notifications-clean
+// @version      1.1
+// @match        https://www.youtube.com/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    function cleanNotifications() {
+        document
+            .querySelectorAll('ytd-notification-renderer .message')
+            .forEach(element => {
+                const oldText = element.textContent;
+
+                const newText = oldText.replace(
+                    /^.*?\s+uploaded:\s*/i,
+                    ''
+                );
+
+                // Important: mutate DOM only if text actually changed
+                if (newText !== oldText) {
+                    element.textContent = newText;
+                }
+            });
+    }
+
+    const observer = new MutationObserver(cleanNotifications);
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    cleanNotifications();
+})();
