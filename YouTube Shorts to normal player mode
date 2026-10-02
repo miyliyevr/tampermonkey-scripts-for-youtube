@@ -1,0 +1,19 @@
+// ==UserScript==
+// @name         YouTube Shorts → Normal Video
+// @namespace    youtube-shorts-to-watch
+// @version      1.0
+// @description  Redirect YouTube Shorts to the normal watch page
+// @match        https://www.youtube.com/shorts/*
+// @run-at       document-start
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const match = location.pathname.match(/^\/shorts\/([^/?]+)/);
+
+    if (match) {
+        location.replace('/watch?v=' + match[1]);
+    }
+})();
