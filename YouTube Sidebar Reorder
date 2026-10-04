@@ -1,0 +1,76 @@
+// ==UserScript==
+// @name         YouTube Sidebar Reorder
+// @match        https://www.youtube.com/*
+// @run-at       document-idle
+// ==/UserScript==
+
+(function () {
+  const TARGETS = [
+    "/feed/playlists",
+    "/feed/history",
+    "/playlist?list=LL", // Liked videos
+    "/playlist?list=WL", // Watch later
+  ];
+
+  function findContainer() {
+    return document.querySelector("ytd-guide-section-renderer #items");
+  }
+
+  function findItems() {
+    return Array.from(document.querySelectorAll("ytd-guide-entry-renderer"));
+  }
+
+  function getItemKey(el) {
+    const a = el.querySelector("a");
+    if (!a) return null;
+
+    try {
+      const url = new URL(a.href);
+      return url.pathname + url.search;
+    } catch {
+      return null;
+    }
+  }
+
+  function reorder() {
+    const container = findContainer();
+    if (!container) return;
+
+    const items = findItems();
+    if (!items.length) return;
+
+    const matches = [];
+
+    for (const el of items) {
+      const key = getItemKey(el);
+      if (TARGETS.includes(key)) {
+        matches.push(el);
+      }
+    }
+
+    if (!matches.length) return;
+
+    // Preserve order defined in TARGETS
+    matches.sort((a, b) => {
+      return TARGETS.indexOf(getItemKey(a)) - TARGETS.indexOf(getItemKey(b));
+    });
+
+    // Insert in reverse so final order is correct
+    matches.reverse().forEach(el => {
+      container.prepend(el);
+    });
+  }
+
+  let timeout;
+  const observer = new MutationObserver(() => {
+    clearTimeout(timeout);
+    timeout = setTimeout(reorder, 100);
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  reorder();
+})();
